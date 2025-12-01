@@ -55,6 +55,13 @@ cd spatial-probing
 pip install -r requirements.txt
 ```
 
+To generate a dataset
+```
+cd data/RAVEN
+python src/dataset/main.py --num-samples <number of samples per configuration> --save-dir <directory to save the dataset>
+```
+This will create several new folders with numpy archive and xml data which we can use. Until we have a dataset we are certain we want to use, I'd avoid pushing them up to the central repo (will cause merge conflicts for everyone).
+
 ---
 
 ## Team
