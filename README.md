@@ -50,9 +50,14 @@ SpatialSense is included to provide a more reliable measure of true spatial reas
 ## Installation
 
 ```
-git clone <this_repo_url>
+git clone --recursive <this_repo_url>
 cd spatial-probing
 pip install -r requirements.txt
+```
+
+If you already had the repo try this but need the RAVEN submodule:
+```
+git submodule update --init --recursive
 ```
 
 To generate a dataset
