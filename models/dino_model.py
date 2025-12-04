@@ -1,8 +1,14 @@
-class DINOv3Wrapper:
-    def __init__(self, model_name: str = "", token=True):
-        # TODO initialize model
-        raise NotImplementedError()
+import torch
+from transformers import AutoImageProcessor, AutoModel
 
-    def get_hidden_states(self, x: torch.Tensor) -> list[torch.Tensor]:
-        # TODO return list of hidden state embeddings
-        raise NotImplementedError()
+class DINOv3Wrapper:
+    def __init__(self, model_name: str, token=True):
+        self.processor = AutoImageProcessor.from_pretrained(model_name)
+        self.model = AutoModel.from_pretrained(model_name, output_hidden_states=True, token=token)
+
+    def get_hidden_states(self, x: list[torch.Tensor]) -> list[torch.Tensor]:
+        inputs = self.processor(images=x, return_tensors="pt")
+        with torch.inference_mode():
+            outputs = self.model(**inputs)
+        all_hidden_states = outputs.hidden_states
+        return all_hidden_states 
