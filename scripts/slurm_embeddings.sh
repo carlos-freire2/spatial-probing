@@ -10,7 +10,10 @@
 #SBATCH --error=slurm_logs/R-%x.%j.err
 
 MODEL_NAME=${1:-CLIP}
-DATA_DIR=${2:-"/oscar/scratch/$USER/RAVEN-10000"}
+# You might get ann OOM error if you try all at the same time (going from RAVEN-10000 directly)
+# Intstead just pick the dir you want and fire off a couple batches at the same time 
+# if you are really impatient (each should take ~3 mins depending on which gpu get)
+DATA_DIR=${2:-"/oscar/scratch/$USER/RAVEN-10000/center_single"}
 OUTPUT_DIR=${3:-"/oscar/scratch/$USER/embeddings/clip-single"}
 
 echo "Model: ${MODEL_NAME}"

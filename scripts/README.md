@@ -28,3 +28,8 @@ If you want per file embeddings (all 8 puzzles in one image), run the preprocess
 Check the slurm_embeddings.sh file to see if you are putting/outputting your files into the same dirs (if not just pass them as positional args when you sbatch it)
 
 Run the slurm_embeddings.sh (extract_embeddings2 handles npy and npz so should not matter whether you stitched or not) using `sbatch slurm_embeddings.sh`
+
+
+## DINOv3 Auth Note
+You will need to be authenticated to access the DINO models. Make a huggingface.co account and then go to `https://huggingface.co/facebook/dinov3-vits16-pretrain-lvd1689m`. There will be a form to fill out and you will basically immediately get access. Grab
+an access token or ssh key (whatever process you are more familiar with/like more) for oscar and you should be all set.
