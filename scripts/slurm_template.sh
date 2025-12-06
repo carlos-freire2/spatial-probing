@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --nodes=1               # node count
-#SBATCH -p 3090-gcondo,gpu --gres=gpu:1     # number of gpus per node
+#SBATCH -p gpu --gres=gpu:1     # how many gpus per node
 #SBATCH --ntasks-per-node=1     # total number of tasks across all nodes
 #SBATCH --cpus-per-task=4       # cpu-cores per task (>1 if multi-threaded tasks)
 #SBATCH -t 02:30:00             # total run time limit (HH:MM:SS)
@@ -11,7 +11,12 @@
 
 MODEL_NAME=${1:-CLIP}
 DATA_DIR=${2:-~/scratch/RAVEN-10000}
-SAVE_DIR=${3:-~/scratch/embeddings/clip-single}
+OUTPUT_DIR=${3:-~/scratch/embeddings/clip-single}
+
+echo "Model: ${MODEL_NAME}"
+echo "Data dir: ${DATA_DIR}"
+echo "Output dir: ${OUTPUT_DIR}"
+echo ""
 
 # Force unbuffered output
 export PYTHONUNBUFFERED=1
@@ -21,7 +26,7 @@ module purge
 unset LD_LIBRARY_PATH
 export APPTAINER_BINDPATH="/oscar/home/$USER,/oscar/scratch/$USER,/oscar/data"
 # Use the correct pre-built container path (note: x86_64.d not x86_64)
-CONTAINER_PATH="~/pytoch-25.11-py3"
+CONTAINER_PATH="~/scratch/pytoch-25.11-py3"
 EXEC_PATH="srun apptainer exec --nv"
 echo ""
 echo "=========================================="
@@ -63,7 +68,7 @@ echo ""
 $EXEC_PATH $CONTAINER_PATH python -u generate_embeddings.py \
 --model $MODEL_NAME \
 --data_dir $DATA_DIR \
---save_dir $SAVE_DIR
+--save_dir $OUTPUT_DIR
 
 EXIT_CODE=$?
 
