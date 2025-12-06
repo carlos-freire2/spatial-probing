@@ -45,8 +45,8 @@ if conda env list | grep -q "^${ENV_NAME} "; then
 fi
 
 # Create conda environment
-echo -e "${BLUE}[2/5] Creating conda environment '${ENV_NAME}' with Python 3.10...${NC}"
-conda create -n ${ENV_NAME} python=3.10 -y
+echo -e "${BLUE}[2/5] Creating conda environment '${ENV_NAME}' with Python 3.13...${NC}"
+conda create -n ${ENV_NAME} python=3.13 -y
 echo -e "${GREEN}Environment created :)${NC}"
 echo ""
 
@@ -58,16 +58,19 @@ echo ""
 
 # Install packages
 echo -e "${BLUE}[4/5] Installing required packages...${NC}"
-echo "   - tensorflow (this may take a few minutes)"
-pip install --quiet tensorflow==2.15.0
+echo "   - torch (this may take a few minutes)"
+#pip install --quiet torch torchvision --index-url https://download.pytorch.org/whl/cu130
+pip install --quiet torch==2.7.1 torchvision==0.22.1 torchaudio==2.7.1 --index-url https://download.pytorch.org/whl/cu118
 echo "   - numpy"
 pip install --quiet numpy
-#echo "   - wandb"
-#pip install --quiet wandb
+echo "   - wandb"
+pip install --quiet wandb
 echo "   - tqdm"
 pip install --quiet tqdm
-#echo "   - pytest"
-#pip install --quiet pytest
+echo "   - pytest"
+pip install --quiet pytest
+echo "   - transformers"
+pip install --quiet transformers
 echo -e "${GREEN}All packages installed :)${NC}"
 echo ""
 
@@ -75,24 +78,23 @@ echo ""
 echo -e "${BLUE}[5/5] Testing installation...${NC}"
 python << 'EOF'
 import sys
-import tensorflow as tf
+import torch
 import numpy as np
-import wandb
 import tqdm
-import pytest
+import transformers
 
 print(f"Python version: {sys.version.split()[0]}")
-print(f"TensorFlow version: {tf.__version__}")
+print(f"PyTorch version: {torch.__version__}")
 print(f"NumPy version: {np.__version__}")
-print(f"wandb version: {wandb.__version__}")
 print(f"tqdm version: {tqdm.__version__}")
-print(f"pytest version: {pytest.__version__}")
+print(f"transformers version: {transformers.__version__}")
 
-# Check GPU availability (will show 0 on login node, but that's expected)
-gpus = tf.config.list_physical_devices('GPU')
-print(f"GPUs detected on this node: {len(gpus)}")
-if len(gpus) == 0:
-    print("  (Note: You're on a login node. GPUs will be available when you submit a job)")
+# Check GPU availability
+device = "cuda" if torch.cuda.is_available() else "cpu"
+if device == "cuda":
+        print("GPUs detected on this node")
+else:
+        print("No GPUs detected")                                                                  
 EOF
 
 echo -e "${GREEN}Installation test passed :)${NC}"
@@ -111,11 +113,5 @@ echo ""
 echo -e "  ${YELLOW}2. In SLURM batch scripts, add these lines:${NC}"
 echo -e "     module load miniconda3/23.11.0s"
 echo -e "     source activate ${ENV_NAME}"
-echo ""
-echo -e "  ${YELLOW}3. To test GPU access (on a GPU node):${NC}"
-echo -e "     interact -g 1"
-echo -e "     module load miniconda3/23.11.0s"
-echo -e "     conda activate ${ENV_NAME}"
-echo -e "     python -c \"import tensorflow as tf; print('GPUs:', tf.config.list_physical_devices('GPU'))\""
 echo ""
 echo -e "${GREEN}You're ready to train your models!${NC}"

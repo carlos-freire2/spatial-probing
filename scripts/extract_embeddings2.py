@@ -4,9 +4,11 @@ import argparse
 import torch
 import numpy as np
 from torch.utils.data import Dataset, DataLoader
-from transformers import CLIPProcessor, CLIPModel
 from PIL import Image
 from tqdm import tqdm
+
+from models.clip_model import CLIPWrapper
+from models.dino_model import DINOv3Wrapper
 
 # --- CONFIG ---
 DEFAULT_IMAGE_DIR = "./RAVEN-10000"                 # Root folder containing subdirs (center_single, etc.)
@@ -47,7 +49,7 @@ class RavenDataset(Dataset):
         try:
             if file_path.endswith('.npz'): # npz has multiple arrays
                 with np.load(file_path) as data:
-                    print(data)
+                    # print(data)
                     # look for 'image' key, throw error otherwise (data must be corrupted)
                     if 'image' in data.files:
                         # keys: target, predict, image, structure, meta_matrix, meta_structure, meta_target
@@ -125,32 +127,50 @@ def stitch_grid(images, blank=False):
     grid = np.pad(grid, 2, mode='constant', constant_values=255)
     return grid
 
+def parse_args():
+    parser = argparse.ArgumentParser(description="Extract embeddings from RAVEN dataset")
+    parser.add_argument("--data_dir", type=str, default=DEFAULT_IMAGE_DIR, 
+                        help="Root folder containing .npz/.npy files")
+    parser.add_argument("--save_dir", type=str, default=DEFAULT_OUTPUT_DIR, 
+                        help="Folder to save .pt embeddings")
+    parser.add_argument("--model", type=str, default=DEFAULT_MODEL_ID, 
+                        help="HuggingFace Model ID (e.g., openai/clip-vit-base-patch32)")
+    return parser.parse_args()
+
 def main():
     device = "cuda" if torch.cuda.is_available() else "cpu"
     if torch.backends.mps.is_available(): device = "mps"    # this is for apple metal gpu
     
     print(f"Using device: {device}")
 
-    parser = argparse.ArgumentParser(description="Generate hidden state embeddings")
-    parser.add_argument("--model", choices=["DINO", "CLIP"], help="model, options are DINO or CLIP")
-    parser.add_argument("--data_dir", help="path to directory where raw data files are located")
-    parser.add_argument("--save_dir", help="path to directory where processed data will be saved")
-    args = parser.parse_args()
+    args = parse_args()
     
     # we don't create OUTPUT_DIR here yet, we create subdirs dynamically but we could if we wanted
+        
+    print(f"Configuration:")
+    print(f"  Model: {args.model}")
+    print(f"  Data:  {args.data_dir}")
+    print(f"  Out:   {args.save_dir}")
     
     # I'm sure parseargs can do this for you but I don't want to read the docs and had these handy already -_-
-    model_id = DEFAULT_MODEL_ID 
-    if args.model != None and args.model.upper() == DINO:
-        model_id = DINO
+    if args.model.upper() == DINO:
+        ## this won't actually work right now but feel free to add whatever / change things 
+        ## and it doesn't actually matter how modular this is if they aren't fitting perfectly
+        ## just rip them apart
+        model_id = DINO_ID
+        model = DINOv3Wrapper(model_id)
     elif args.model.upper() == CLIP:
-        model_id = CLIP
+        model_id = CLIP_ID
+        model = CLIPWrapper(model_id)
+    else:
+        print("couldn't find model")
+        return
 
     image_dir = args.data_dir if args.data_dir != None else DEFAULT_IMAGE_DIR
     output_dir = args.save_dir if args.save_dir != None else DEFAULT_OUTPUT_DIR
 
-    model = CLIPModel.from_pretrained(model_id).to(device)
-    processor = CLIPProcessor.from_pretrained(model_id)
+    processor = model.processor
+    model = model.to(device) # move to gpu (no-op if running on cpu)
     model.eval()
 
     dataset = RavenDataset(image_dir, processor)
@@ -168,8 +188,7 @@ def main():
 
             pixel_values = pixel_values.to(device)
             
-
-            outputs = model.vision_model(pixel_values=pixel_values, output_hidden_states=True)
+            outputs = model(pixel_values=pixel_values, output_hidden_states=True)
             
             all_layers = torch.stack(outputs.hidden_states)
             # only take CLS
