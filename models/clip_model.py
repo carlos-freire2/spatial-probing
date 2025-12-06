@@ -1,10 +1,10 @@
 import torch
-from transformers import AutoProcessor, CLIPVisionModel
+from transformers import AutoImageProcessor, CLIPVisionModel
 
 class CLIPWrapper(torch.nn.Module):
     def __init__(self, model_name: str = ""):
         super().__init__()
-        self.processor = AutoProcessor.from_pretrained(model_name)
+        self.processor = AutoImageProcessor.from_pretrained(model_name)
         self.model = CLIPVisionModel.from_pretrained(model_name)
 
     def forward(self, pixel_values, output_hidden_states):

@@ -7,6 +7,9 @@ class DINOv3Wrapper(torch.nn.Module):
         self.processor = AutoImageProcessor.from_pretrained(model_name)
         self.model = AutoModel.from_pretrained(model_name, output_hidden_states=True, token=token)
 
+    def forward(self, pixel_values, output_hidden_states):
+        return self.model(pixel_values=pixel_values, output_hidden_states=output_hidden_states)
+    
     def get_hidden_states(self, x: list[torch.Tensor]) -> list[torch.Tensor]:
         inputs = self.processor(images=x, return_tensors="pt")
         with torch.inference_mode():

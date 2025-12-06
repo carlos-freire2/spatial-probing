@@ -68,7 +68,7 @@ cd "${SLURM_SUBMIT_DIR}" || exit 1
 echo "Working directory: $(pwd)"
 echo ""
 
-python -u extract_embeddings2.py \
+python -u extract_embeddings_single.py \
 --model $MODEL_NAME \
 --data_dir $DATA_DIR \
 --save_dir $OUTPUT_DIR
