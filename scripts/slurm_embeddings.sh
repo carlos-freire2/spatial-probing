@@ -11,7 +11,7 @@
 
 MODEL_NAME=${1:-CLIP}
 DATA_DIR=${2:-"/oscar/scratch/$USER/RAVEN-10000"}
-OUTPUT_DIR=${3:-/oscar/scratch/$USER/embeddings/clip-single}
+OUTPUT_DIR=${3:-"/oscar/scratch/$USER/embeddings/clip-single"}
 
 echo "Model: ${MODEL_NAME}"
 echo "Data dir: ${DATA_DIR}"
@@ -68,7 +68,7 @@ cd "${SLURM_SUBMIT_DIR}" || exit 1
 echo "Working directory: $(pwd)"
 echo ""
 
-python -u extract_embeddings.py \
+python -u extract_embeddings2.py \
 --model $MODEL_NAME \
 --data_dir $DATA_DIR \
 --save_dir $OUTPUT_DIR
