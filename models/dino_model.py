@@ -1,8 +1,9 @@
 import torch
 from transformers import AutoImageProcessor, AutoModel
 
-class DINOv3Wrapper:
+class DINOv3Wrapper(torch.nn.Module):
     def __init__(self, model_name: str, token=True):
+        super().__init__()
         self.processor = AutoImageProcessor.from_pretrained(model_name)
         self.model = AutoModel.from_pretrained(model_name, output_hidden_states=True, token=token)
 

@@ -1,9 +1,13 @@
-class CLIPWrapper:
-    def __init__(self, model_name: str = "", token=True):
-        # TODO initialize model
-        raise NotImplementedError()
+import torch
+from transformers import AutoProcessor, CLIPVisionModel
 
-    def get_hidden_states(self, x: torch.Tensor) -> list[torch.Tensor]:
-        # TODO return list of hidden state embeddings
-        raise NotImplementedError()
+class CLIPWrapper(torch.nn.Module):
+    def __init__(self, model_name: str = ""):
+        super().__init__()
+        self.processor = AutoProcessor.from_pretrained(model_name)
+        self.model = CLIPVisionModel.from_pretrained(model_name)
+
+    def forward(self, pixel_values, output_hidden_states):
+        return self.model(pixel_values=pixel_values, output_hidden_states=output_hidden_states)
+        
         
