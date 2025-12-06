@@ -182,6 +182,13 @@ def main():
     print(f"Found {len(dataset)} RAVEN files across all subdirs")
     print("Starting extraction...")
 
+    # 13 layers (1 embeddings + 12 encoder blocks)
+    num_layers = 13 
+    
+    # list of lists to hold numpy arrays for each layer (if it's slow we can optimize this)
+    layer_storage = [[] for _ in range(num_layers)]
+    all_filenames = []
+
     with torch.inference_mode():
         for batch_idx, (pixel_values, rel_paths) in tqdm(enumerate(dataloader), total=len(dataloader)):
             if pixel_values is None: continue
@@ -189,37 +196,35 @@ def main():
             pixel_values = pixel_values.to(device)
             
             outputs = model(pixel_values=pixel_values, output_hidden_states=True)
+
+            # shape (Batch, Seq_Len, Dim) -> (Batch, 197 ## this is 1 cls + 196 patches ##, 768)
+            for layer_idx, layer_tensor in enumerate(outputs.hidden_states):
+                # extract CLS token: (Batch, Seq, Dim) -> (Batch, Dim)
+                cls_token = layer_tensor[:, 0, :]
+                
+                # move to CPU and store as numpy
+                layer_storage[layer_idx].append(cls_token.cpu().numpy())
             
-            all_layers = torch.stack(outputs.hidden_states)
-            # only take CLS
-            cls_features = all_layers[:, :, 0, :] # (Layers, Batch*16, Dim)
+            # Store filenames
+            all_filenames.extend(rel_paths)
+            
+    os.makedirs(output_dir, exist_ok=True)
+    np.save(os.path.join(output_dir, "filenames.npy"), np.array(all_filenames))
 
-            # reshape back to separate files
-            num_layers, _, dim = cls_features.shape
-            num_files = len(rel_paths)
-            panels_per_file = 16 
+    # NOTE: JIC we need to double check which indexes refer to which files (we are sorting so it should be fine) 
+    print(f"Saved filenames.npy ({len(all_filenames)} files)")
 
-            reshaped_features = cls_features.view(num_layers, num_files, panels_per_file, dim)
-
-            # SAVE LOGIC
-            # since BATCH_SIZE might be > 1, we iterate through the batch but currently does nothing
-            for i in range(num_files):
-                current_features = reshaped_features[:, i, :, :] # (Layers, 16, Dim)
-                current_rel_path = rel_paths[i] # e.g. "center_single/RAVEN_0_train.npz"
-                
-                # here we create the output path so we need to remove .npz extension
-                file_name_no_ext = os.path.splitext(current_rel_path)[0] 
-                # combine with output root: "clip_embeddings/center_single/RAVEN_0_train.pt"
-                save_path = os.path.join(output_dir, f"{file_name_no_ext}.pt")
-                
-                # create the subdirectory if it doesn't exist
-                os.makedirs(os.path.dirname(save_path), exist_ok=True)
-                
-                # I guess we don't really need the filename here maybe we just shove the feature?
-                torch.save({
-                    "features": current_features.cpu(),
-                    "filename": current_rel_path
-                }, save_path)
+    # SAVE LOGIC 
+    for layer_idx in range(num_layers):
+        # concat all batches for this layer
+        full_layer_array = np.concatenate(layer_storage[layer_idx], axis=0) # shape: (Total_Images, Dim)
+        
+        save_name = f"layer_{layer_idx}.npy"
+        save_path = os.path.join(output_dir, save_name)
+        
+        np.save(save_path, full_layer_array)
+        # just a sanity check can comment out
+        print(f"saved file {save_name} | shape: {full_layer_array.shape}") 
 
     print("---------------- Done with embedding extraction! ----------------")
 
