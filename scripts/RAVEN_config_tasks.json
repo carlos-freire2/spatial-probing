@@ -1,0 +1,258 @@
+{
+    "center_single": {
+        "Number/Position": [
+            "Constant"
+        ],
+        "Type": [
+            "Constant",
+            "Progression",
+            "Distribute_Three"
+        ],
+        "Size": [
+            "Constant",
+            "Progression",
+            "Arithmetic",
+            "Distribute_Three"
+        ],
+        "Color": [
+            "Constant",
+            "Progression",
+            "Arithmetic",
+            "Distribute_Three"
+        ]
+    },
+    "up_center_single_down_center_single": {
+        "Number/Position_0": [
+            "Constant"
+        ],
+        "Type_0": [
+            "Constant",
+            "Progression",
+            "Distribute_Three"
+        ],
+        "Size_0": [
+            "Constant",
+            "Progression",
+            "Arithmetic",
+            "Distribute_Three"
+        ],
+        "Color_0": [
+            "Constant",
+            "Progression",
+            "Arithmetic",
+            "Distribute_Three"
+        ],
+        "Number/Position_1": [
+            "Constant"
+        ],
+        "Type_1": [
+            "Constant",
+            "Progression",
+            "Distribute_Three"
+        ],
+        "Size_1": [
+            "Constant",
+            "Progression",
+            "Arithmetic",
+            "Distribute_Three"
+        ],
+        "Color_1": [
+            "Constant",
+            "Progression",
+            "Arithmetic",
+            "Distribute_Three"
+        ]
+    },
+    "left_center_single_right_center_single": {
+        "Number/Position_0": [
+            "Constant"
+        ],
+        "Type_0": [
+            "Constant",
+            "Progression",
+            "Distribute_Three"
+        ],
+        "Size_0": [
+            "Constant",
+            "Progression",
+            "Arithmetic",
+            "Distribute_Three"
+        ],
+        "Color_0": [
+            "Constant",
+            "Progression",
+            "Arithmetic",
+            "Distribute_Three"
+        ],
+        "Number/Position_1": [
+            "Constant"
+        ],
+        "Type_1": [
+            "Constant",
+            "Progression",
+            "Distribute_Three"
+        ],
+        "Size_1": [
+            "Constant",
+            "Progression",
+            "Arithmetic",
+            "Distribute_Three"
+        ],
+        "Color_1": [
+            "Constant",
+            "Progression",
+            "Arithmetic",
+            "Distribute_Three"
+        ]
+    },
+    "distribute_nine": {
+        "Position": [
+            "Progression",
+            "Arithmetic",
+            "Distribute_Three"
+        ],
+        "Type": [
+            "Constant",
+            "Progression",
+            "Distribute_Three"
+        ],
+        "Size": [
+            "Constant",
+            "Progression",
+            "Arithmetic",
+            "Distribute_Three"
+        ],
+        "Color": [
+            "Constant",
+            "Progression",
+            "Arithmetic",
+            "Distribute_Three"
+        ],
+        "Number": [
+            "Progression",
+            "Arithmetic",
+            "Distribute_Three"
+        ],
+        "Number/Position": [
+            "Constant"
+        ]
+    },
+    "in_center_single_out_center_single": {
+        "Number/Position_0": [
+            "Constant"
+        ],
+        "Type_0": [
+            "Constant",
+            "Progression",
+            "Distribute_Three"
+        ],
+        "Size_0": [
+            "Constant",
+            "Progression",
+            "Distribute_Three"
+        ],
+        "Color_0": [
+            "Constant"
+        ],
+        "Number/Position_1": [
+            "Constant"
+        ],
+        "Type_1": [
+            "Constant",
+            "Progression",
+            "Distribute_Three"
+        ],
+        "Size_1": [
+            "Constant",
+            "Progression",
+            "Arithmetic",
+            "Distribute_Three"
+        ],
+        "Color_1": [
+            "Constant",
+            "Progression",
+            "Arithmetic",
+            "Distribute_Three"
+        ]
+    },
+    "distribute_four": {
+        "Number": [
+            "Progression",
+            "Arithmetic",
+            "Distribute_Three"
+        ],
+        "Type": [
+            "Constant",
+            "Progression",
+            "Distribute_Three"
+        ],
+        "Size": [
+            "Constant",
+            "Progression",
+            "Arithmetic",
+            "Distribute_Three"
+        ],
+        "Color": [
+            "Constant",
+            "Progression",
+            "Arithmetic",
+            "Distribute_Three"
+        ],
+        "Position": [
+            "Progression",
+            "Arithmetic",
+            "Distribute_Three"
+        ],
+        "Number/Position": [
+            "Constant"
+        ]
+    },
+    "in_distribute_four_out_center_single": {
+        "Number/Position_0": [
+            "Constant"
+        ],
+        "Type_0": [
+            "Constant",
+            "Progression",
+            "Distribute_Three"
+        ],
+        "Size_0": [
+            "Constant",
+            "Progression",
+            "Distribute_Three"
+        ],
+        "Color_0": [
+            "Constant"
+        ],
+        "Position_1": [
+            "Progression",
+            "Arithmetic",
+            "Distribute_Three"
+        ],
+        "Type_1": [
+            "Constant",
+            "Progression",
+            "Distribute_Three"
+        ],
+        "Size_1": [
+            "Constant",
+            "Progression",
+            "Arithmetic",
+            "Distribute_Three"
+        ],
+        "Color_1": [
+            "Progression",
+            "Arithmetic",
+            "Distribute_Three",
+            "Constant"
+        ],
+        "Number/Position_1": [
+            "Constant"
+        ],
+        "Number_1": [
+            "Progression",
+            "Arithmetic",
+            "Distribute_Three"
+        ]
+    }
+}
