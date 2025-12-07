@@ -4,7 +4,8 @@ Preprocesses RAVEN dataset by stitching puzzle images into a grid.
 Example: 
 python scripts/preprocess_RAVEN.py \
     --data_dir /data/RAVEN-10000/ \
-    --save_dir /data/RAVEN_preprocessed/
+    --save_dir /data/RAVEN_preprocessed/ \
+    --blank
 """
 
 import os
@@ -17,6 +18,7 @@ def main():
     parser = argparse.ArgumentParser(description="Preprocess RAVEN dataset")
     parser.add_argument("--data_dir", help="path to directory where raw data files are located")
     parser.add_argument("--save_dir", help="path to directory where processed data will be saved")
+    parser.add_argument("--blank", action='store_true', help="optional, leaves out target image from puzzle")
     args = parser.parse_args()
 
     dirs = [d.name for d in os.scandir(args.data_dir) if d.is_dir()]
@@ -27,14 +29,22 @@ def main():
 
         type_dir_path = os.path.join(args.data_dir, type_dir)
         filenames = os.listdir(type_dir_path)
+
+        # sort filenames so that indices will be in order
+        def get_num(name):
+            return int(name[name.find("_")+1:name.rfind("_")])
+        filenames = sorted(filenames, key=get_num, reverse=False)
+
         for f in filenames:
             if f.endswith(".xml"): continue
 
+            # get stitched image
             npz_path = os.path.join(args.data_dir, type_dir, f)
             data = np.load(npz_path)
-            grid = stitch_grid(data["image"])
+            grid = stitch_grid(data["image"], data["target"], blank=args.blank)
             images.append(grid)
 
+            # get rule data
             num = f[f.find("_")+1:f.rfind("_")]
             split = f[f.rfind("_")+1:f.rfind(".")]
 
@@ -78,15 +88,21 @@ def get_rules(root):
         rules_data["rule_group_" + rule_group.get("id")] = r
     return rules_data
 
-def stitch_grid(images, blank=False):
+def stitch_grid(images, target, blank=False):
     grid = []
     for i in range(3):
         row = []
         for j in range(3):
-            if (i == 2) & (j == 2) & (blank == True): 
-                blank = np.ones(images[0].shape)*255
-                blank = np.pad(blank, 6, constant_values=255)
-                row += [blank]
+            if (i == 2) & (j == 2): 
+                if blank == True:
+                    blank = np.ones(images[0].shape)*255
+                    blank = np.pad(blank, 6, constant_values=255)
+                    row += [blank]
+                else:
+                    # use target image
+                    im = np.pad(images[8 + target], 2)
+                    im = np.pad(im, 4, constant_values=255)
+                    row += [im]
                 continue
             im = np.pad(images[i*3+j], 2)
             im = np.pad(im, 4, constant_values=255)
