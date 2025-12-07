@@ -34,18 +34,18 @@ from probing.train import train_and_evaluate
 
 def main():
     parser = argparse.ArgumentParser(description="Run probe experiement")
-    parser.add_argument("--embedding_dir", help="")
-    parser.add_argument("--save_dir", help="")
+    parser.add_argument("--embedding_dir", help="path to directory where embeddings are located")
+    parser.add_argument("--save_dir", help="path to directory where results will be saved")
     parser.add_argument("--model", help="model name")
-    parser.add_argument("--layer", help="")
+    parser.add_argument("--layer", help="which model layer outputs to probe")
     parser.add_argument("--probe", choices=["linear", "MLP"], help="probe model type, options are linear or MLP")
     parser.add_argument("--dataset_name", choices=["RAVEN"], help="name of dataset, option is RAVEN")
-    parser.add_argument("--data_config", choices=["center_single"], help="")
-    parser.add_argument("--task", help="")
-    parser.add_argument("--seed", default=42, help="")
-    parser.add_argument("--lr", default=0.001, help="")
-    parser.add_argument("--batch_size", default=32, help="")
-    parser.add_argument("--epochs", default=10, help="")
+    parser.add_argument("--data_config", help="type of RAVEN puzzle, e.g. center_single")
+    parser.add_argument("--task", help="task to probe for (see RAVEN_config_tasks.json)")
+    parser.add_argument("--seed", default=42)
+    parser.add_argument("--lr", default=0.001)
+    parser.add_argument("--batch_size", default=32)
+    parser.add_argument("--epochs", default=10)
     args = parser.parse_args()
 
     # load embeddings and labels
@@ -64,26 +64,26 @@ def main():
 
     # initialize and train probe
     set_seed(int(args.seed))
+    embedding_dim = train_data.shape[-1]
     num_classes = len(class_labels.keys())
     if args.probe == "linear":
-        probe = LinearProbe(num_classes=num_classes)
+        probe = LinearProbe(embedding_dim=embedding_dim, num_classes=num_classes)
     if args.probe == "MLP":
-        probe = MLPProbe(num_classes=num_classes)
+        probe = MLPProbe(embedding_dim=embedding_dim, num_classes=num_classes)
 
     metrics, trained_model = train_and_evaluate(
         model=probe, 
-        train_data=train_data, 
-        train_labels=train_labels, 
-        val_data=val_data, 
-        val_labels=val_labels,
-        test_data=test_data, 
-        test_labels=test_labels,
-        lr=args.lr,
-        batch_size=args.batch_size,
-        epochs=args.epochs)
+        train_data=torch.tensor(train_data), 
+        train_labels=torch.tensor(train_labels), 
+        test_data=torch.tensor(test_data), 
+        test_labels=torch.tensor(test_labels),
+        lr=float(args.lr),
+        batch_size=int(args.batch_size),
+        epochs=int(args.epochs))
     
     # save trained model weights
-    save_path = os.path.join(args.save_dir, args.model, args.layer, args.probe, args.dataset_name, args.data_config, args.task)
+    save_path = os.path.join(args.save_dir, args.model, "layer_" + str(args.layer), args.probe, args.dataset_name, args.data_config, args.task)
+    os.makedirs(save_path, exist_ok=True)
     checkpoint_save_path = os.path.join(save_path, "model.pth")
     torch.save(trained_model.state_dict(), checkpoint_save_path)
 
@@ -129,8 +129,11 @@ def get_train_val_test(data, labels, task, data_config, task_json):
 
         if labels[k]["split"] == "train": 
             train_data.append(data[int(k)])
-            if task.endswith("1"):
-                rule = rules_lookup_1[task]
+            if task.endswith("0"):
+                rule = rules_lookup_0[task[:-2]]
+                train_labels.append(classes.index(rule))
+            elif task.endswith("1"):
+                rule = rules_lookup_1[task[:-2]]
                 train_labels.append(classes.index(rule))
             else: 
                 rule = rules_lookup_0[task]
@@ -138,8 +141,11 @@ def get_train_val_test(data, labels, task, data_config, task_json):
 
         if labels[k]["split"] == "val": 
             val_data.append(data[int(k)])
-            if task.endswith("1"):
-                rule = rules_lookup_1[task]
+            if task.endswith("0"):
+                rule = rules_lookup_0[task[:-2]]
+                val_labels.append(classes.index(rule))
+            elif task.endswith("1"):
+                rule = rules_lookup_1[task[:-2]]
                 val_labels.append(classes.index(rule))
             else: 
                 rule = rules_lookup_0[task]
@@ -147,8 +153,11 @@ def get_train_val_test(data, labels, task, data_config, task_json):
 
         if labels[k]["split"] == "test": 
             test_data.append(data[int(k)])
-            if task.endswith("1"):
-                rule = rules_lookup_1[task]
+            if task.endswith("0"):
+                rule = rules_lookup_0[task[:-2]]
+                test_labels.append(classes.index(rule))
+            elif task.endswith("1"):
+                rule = rules_lookup_1[task[:-2]]
                 test_labels.append(classes.index(rule))
             else: 
                 rule = rules_lookup_0[task]

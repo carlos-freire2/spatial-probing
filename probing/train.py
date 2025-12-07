@@ -86,4 +86,3 @@ def train_and_evaluate(
 
     return metrics, model
  
->>>>>>> 95b061d (Implement train.py, linear_probe.py, mlp_probe.py and row preprocessing)
