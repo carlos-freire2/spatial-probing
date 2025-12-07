@@ -38,6 +38,10 @@ def main():
         for f in filenames:
             if f.endswith(".xml"): continue
 
+            # check for unexpected misalignment of labels
+            num = f[f.find("_")+1:f.rfind("_")]
+            if (len(images)) != int(num): raise RuntimeError("label indices misaligned")
+
             # get stitched image
             npz_path = os.path.join(args.data_dir, type_dir, f)
             data = np.load(npz_path)
@@ -45,7 +49,6 @@ def main():
             images.append(grid)
 
             # get rule data
-            num = f[f.find("_")+1:f.rfind("_")]
             split = f[f.rfind("_")+1:f.rfind(".")]
 
             xml_data_filename = f[:f.rfind(".")] + ".xml"
