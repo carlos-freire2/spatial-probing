@@ -31,6 +31,7 @@ def train_and_evaluate(
     train_losses = []
     test_losses = []
     test_accuracies = []
+    test_class_accuracies = []
 
     for epoch in range(epochs):
         model.train()
@@ -55,6 +56,9 @@ def train_and_evaluate(
         model.eval()
         correct = 0
         total = 0
+        classes = sorted(torch.unique(train_labels))
+        class_correct = [0]*len(classes)
+        class_total = [0]*len(classes)
         test_loss_epoch = 0.0
 
         with torch.no_grad():
@@ -70,11 +74,18 @@ def train_and_evaluate(
                 correct += (predicted == batch_y).sum().item()
                 total += batch_y.size(0)
 
+                for c in classes:
+                    mask = batch_y == c
+                    class_correct[c] += (predicted[mask] == batch_y[mask]).sum().item()
+                    class_total[c] += batch_y[mask].size(0)
+
         avg_test_loss = test_loss_epoch / len(test_loader)
         accuracy = correct / total
+        class_accuracies = [(class_correct[i] / class_total[i]) for i in range(len(class_correct))]
 
         test_losses.append(avg_test_loss)
         test_accuracies.append(accuracy)
+        test_class_accuracies.append(class_accuracies)
 
         print(f"[Epoch {epoch+1}/{epochs}] Train Loss: {avg_train_loss:.4f} | Test Loss: {avg_test_loss:.4f} | Test Acc: {accuracy:.4f}")
 
@@ -82,6 +93,7 @@ def train_and_evaluate(
         "train_loss": train_losses,
         "test_loss": test_losses,
         "test_accuracy": test_accuracies[-1],
+        "test_class_accuracy": test_class_accuracies[-1],
     }
 
     return metrics, model
