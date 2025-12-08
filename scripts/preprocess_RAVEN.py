@@ -12,6 +12,7 @@ import os
 import argparse
 import numpy as np
 import json
+from tqdm import tqdm
 import xml.etree.ElementTree as ET
 
 def main():
@@ -22,6 +23,7 @@ def main():
     args = parser.parse_args()
 
     dirs = [d.name for d in os.scandir(args.data_dir) if d.is_dir()]
+
     for type_dir in dirs:
 
         images = []
@@ -35,11 +37,14 @@ def main():
             return int(name[name.find("_")+1:name.rfind("_")])
         filenames = sorted(filenames, key=get_num, reverse=False)
 
-        for f in filenames:
+        for i, f in tqdm(enumerate(filenames), total=len(filenames)):
             if f.endswith(".xml"): continue
 
             # check for unexpected misalignment of labels
-            num = f[f.find("_")+1:f.rfind("_")]
+            idx_first_underscore = f.find("_")
+            idx_last_underscore = f.rfind("_")
+            idx_last_period = f.rfind(".") 
+            num = f[idx_first_underscore+1:idx_last_underscore]
             if (len(images)) != int(num): raise RuntimeError("label indices misaligned")
 
             # get stitched image
@@ -49,9 +54,9 @@ def main():
             images.append(grid)
 
             # get rule data
-            split = f[f.rfind("_")+1:f.rfind(".")]
+            split = f[idx_last_underscore+1:idx_last_period]
 
-            xml_data_filename = f[:f.rfind(".")] + ".xml"
+            xml_data_filename = f[:idx_last_period] + ".xml"
             xml_path = os.path.join(args.data_dir, type_dir, xml_data_filename)
             tree = ET.parse(xml_path)
             root = tree.getroot()
@@ -92,13 +97,20 @@ def get_rules(root):
     return rules_data
 
 def stitch_grid(images, target, blank=False):
+    if len(images) == 0:
+        print("No images to stitch")
+        raise RuntimeError()
+    
+    dtype = images[0].dtype
     grid = []
     for i in range(3):
         row = []
         for j in range(3):
-            if (i == 2) & (j == 2): 
+            if (i == 2) and (j == 2): 
                 if blank == True:
-                    blank = np.ones(images[0].shape)*255
+                    # make sure we are not converting to float64s here
+                    # model preprocessor will handle all of that
+                    blank = np.ones(images[0].shape, dtype=dtype)*255
                     blank = np.pad(blank, 6, constant_values=255)
                     row += [blank]
                 else:
@@ -114,7 +126,7 @@ def stitch_grid(images, target, blank=False):
         grid += [row]
     grid = np.concatenate(grid, axis=0)
     grid = np.pad(grid, 2, mode='constant', constant_values=255)
-    return grid
+    return grid.astype(np.uint8) # jic
 
 if __name__ == "__main__":
     main() 
