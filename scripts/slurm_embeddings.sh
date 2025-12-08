@@ -1,6 +1,7 @@
 #!/bin/bash
 #SBATCH --nodes=1               # node count
 #SBATCH -p gpu --gres=gpu:1     # how many gpus per node
+#SBATCH -N 1
 #SBATCH --ntasks-per-node=1     # total number of tasks across all nodes
 #SBATCH --cpus-per-task=4       # cpu-cores per task (>1 if multi-threaded tasks)
 #SBATCH -t 02:30:00             # total run time limit (HH:MM:SS)
@@ -13,8 +14,8 @@ MODEL_NAME=${1:-CLIP}
 # You might get ann OOM error if you try all at the same time (going from RAVEN-10000 directly)
 # Intstead just pick the dir you want and fire off a couple batches at the same time 
 # if you are really impatient (each should take ~3 mins depending on which gpu get)
-DATA_DIR=${2:-"/oscar/scratch/$USER/RAVEN-10000/center_single"}
-OUTPUT_DIR=${3:-"/oscar/scratch/$USER/embeddings/clip-single"}
+DATA_DIR=${2:-"/oscar/scratch/$USER/spatial-probing/images/center_single"}
+OUTPUT_DIR=${3:-"/oscar/scratch/$USER/embeddings/center_single_stitched_blank"}
 
 echo "Model: ${MODEL_NAME}"
 echo "Data dir: ${DATA_DIR}"

@@ -35,7 +35,7 @@ def main():
 
     data_path = os.path.join(args.data_dir, "images.npy")
     labels_path = os.path.join(args.data_dir, "labels.json")
-    images = np.load(data_path)
+    images = np.load(data_path, mmap_mode="r")
 
     # get hidden state outputs from the selected model
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -46,20 +46,26 @@ def main():
 
     dataset = TensorDataset(images)
     dataloader = DataLoader(dataset, batch_size=32, shuffle=False)
-    all_outputs = []
+    #all_outputs = []
+    num_layers = 13
+    layer_storage = [[] for _ in range(num_layers)]
     for batch in tqdm(dataloader):
         outputs = model.get_hidden_states(batch, device)
-        all_outputs.append(outputs)
+        for i, layer_tensor in enumerate(outputs):
+            cls_token = layer_tensor[:, 0, :]
+            layer_storage[i].append(cls_token.cpu())
+        # all_outputs.append(outputs)
 
-    join_layers = list(zip(*all_outputs)) # group data from each layer together
-    all_outputs = [torch.cat(l, dim=0) for l in join_layers]
+    # join_layers = list(zip(*all_outputs)) # group data from each layer together
+    # all_outputs = [torch.cat(l, dim=0) for l in join_layers]
 
+    
+    os.makedirs(args.save_dir, exist_ok=True)
     # save CLS embeddings for each layer
-    for l, embedding in enumerate(all_outputs):
-        os.makedirs(args.save_dir, exist_ok=True)
+    for l, embedding in enumerate(layer_storage):
         save_path = os.path.join(args.save_dir, "layer_" + str(l) + ".npy")
-        CLS_embedding = embedding[:,0,:].cpu().numpy() # get embedding for CLS token
-        np.save(save_path, CLS_embedding)
+        full_layer_data = torch.cat(embedding, dim=0).numpy() # get embedding for CLS token
+        np.save(save_path, full_layer_data)
 
     labels_save_path = os.path.join(args.save_dir, "labels.json")
     shutil.copy(labels_path, labels_save_path)
@@ -72,7 +78,8 @@ class TensorDataset(Dataset):
         return len(self.data)
 
     def __getitem__(self, idx):
-        return self.data[idx]
+        return torch.from_numpy(np.array(self.data[idx]))
 
 if __name__ == "__main__":
     main() 
+

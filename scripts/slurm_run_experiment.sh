@@ -17,6 +17,7 @@ module purge
 unset LD_LIBRARY_PATH
 module load miniconda3/23.11.0s
 source /oscar/runtime/software/external/miniconda3/23.11.0/etc/profile.d/conda.sh
+conda deactivate
 conda activate team2d
 export APPTAINER_BINDPATH="/oscar/home/$USER,/oscar/scratch/$USER,/oscar/data"
 # Use the correct pre-built container path (note: x86_64.d not x86_64)
@@ -62,7 +63,7 @@ echo ""
 
 embedding_dir="$HOME/scratch/embeddings/"
 save_dir="$HOME/scratch/experiments"
-models=("CLIP" "DINOv3")
+models=("CLIP")
 layers=(2 4 6 8 10 12)
 probes=(linear MLP)
 dataset_name="RAVEN"
@@ -77,13 +78,13 @@ for model in "${models[@]}"; do
     for layer in "${layers[@]}"; do
         for probe in "${probes[@]}"; do
             for task in "${tasks[@]}"; do
-                python scripts/run_experiment.py --embedding_dir "$embedding_dir" \
+                python run_experiment.py --embedding_dir "$embedding_dir" \
                                                 --save_dir "$save_dir" \
                                                 --model "$model" \
                                                 --layer "$layer" \
                                                 --probe "$probe" \
                                                 --dataset_name "$dataset_name" \
-                                                --data_config "$config" \
+                                                --data_config "$data_configs" \
                                                 --task "$task" \
                                                 --seed "$seed" \
                                                 --lr "$lr" \
