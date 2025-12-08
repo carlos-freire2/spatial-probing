@@ -1,5 +1,6 @@
 import torch
 from transformers import AutoImageProcessor, CLIPModel
+from PIL import Image
 
 class CLIPWrapper(torch.nn.Module):
     def __init__(self, model_name: str):
@@ -11,7 +12,8 @@ class CLIPWrapper(torch.nn.Module):
     def forward(self, pixel_values, output_hidden_states):
         return self.model(pixel_values=pixel_values, output_hidden_states=output_hidden_states)
     
-    def get_hidden_states(self, x: list[torch.Tensor], device) -> list[torch.Tensor]:
+    def get_hidden_states(self, x: torch.Tensor, device) -> list[torch.Tensor]:
+        x = [Image.fromarray(im.numpy()) for im in x]
         inputs = self.processor(images=x, return_tensors="pt")
 
         self.model = self.model.to(device)
