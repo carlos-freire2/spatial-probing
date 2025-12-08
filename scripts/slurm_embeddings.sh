@@ -15,7 +15,7 @@ MODEL_NAME=${1:-CLIP}
 # Intstead just pick the dir you want and fire off a couple batches at the same time 
 # if you are really impatient (each should take ~3 mins depending on which gpu get)
 DATA_DIR=${2:-"/oscar/scratch/$USER/spatial-probing/images/center_single"}
-OUTPUT_DIR=${3:-"/oscar/scratch/$USER/embeddings/center_single_stitched_blank"}
+OUTPUT_DIR=${3:-"/oscar/scratch/$USER/embeddings/center_single"}
 
 echo "Model: ${MODEL_NAME}"
 echo "Data dir: ${DATA_DIR}"

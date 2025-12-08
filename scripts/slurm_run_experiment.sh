@@ -63,8 +63,8 @@ echo ""
 
 embedding_dir="$HOME/scratch/embeddings/"
 save_dir="$HOME/scratch/experiments"
-models=("CLIP")
-layers=(2 4 6 8 10 12)
+models=("DINOv3")
+layers=(0 2 4 6 8 10 12)
 probes=(linear MLP)
 dataset_name="RAVEN"
 data_configs="center_single"
@@ -72,7 +72,7 @@ tasks=("Type" "Size" "Color")
 seed=42
 lr=0.001
 batch_size=64
-epochs=15
+epochs=45
 
 for model in "${models[@]}"; do
     for layer in "${layers[@]}"; do
