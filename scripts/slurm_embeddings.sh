@@ -24,13 +24,16 @@ echo ""
 # Force unbuffered output
 export PYTHONUNBUFFERED=1
 export PYTHONIOENCODING=utf-8
+export PYTHONPATH=~/scratch/spatial-probing
 
 module purge
 unset LD_LIBRARY_PATH
 module load miniconda3/23.11.0s
 source /oscar/runtime/software/external/miniconda3/23.11.0/etc/profile.d/conda.sh
+conda deactivate
 conda activate team2d
 export APPTAINER_BINDPATH="/oscar/home/$USER,/oscar/scratch/$USER,/oscar/data"
+PYTHON_EXEC="/oscar/home/$USER/.conda/envs/team2d/bin/python"
 # Use the correct pre-built container path (note: x86_64.d not x86_64)
 #CONTAINER_PATH="/oscar/home/$USER/scratch/pytorch-24.11-py3.simg"
 #EXEC_PATH="srun apptainer exec --nv"
@@ -71,7 +74,7 @@ cd "${SLURM_SUBMIT_DIR}" || exit 1
 echo "Working directory: $(pwd)"
 echo ""
 
-python -u extract_embeddings_single.py \
+python -u extract_embeddings.py \
 --model $MODEL_NAME \
 --data_dir $DATA_DIR \
 --save_dir $OUTPUT_DIR
