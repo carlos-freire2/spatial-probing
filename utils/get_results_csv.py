@@ -17,7 +17,7 @@ parser.add_argument("--data_dir", help="path to root directory where experiments
 parser.add_argument("--save_dir", help="path to directory where csv will be saved")
 args = parser.parse_args()
 
-header = ["model", "layer", "probe", "dataset_name", "data_config", "task", "acc"]
+header = ["model", "layer", "probe", "dataset_name", "data_config", "task", "acc", "class_accs", "class_names"]
 def metrics_search(dir):
     paths = []
 
@@ -49,13 +49,16 @@ for m in metrics_paths:
 
     with open(m, 'r', encoding='utf-8') as f:
         m_json = json.load(f)
-    labels.append(m_json['test_accuracy'])
+    labels.append(m_json["test_accuracy"])
+    class_accs = [round(v, 4) for v in m_json["test_class_accuracy"]]
+    labels.append(str(class_accs))
+    class_names = [m_json["classes"][k] for k in m_json["classes"].keys()]
+    labels.append(str(class_names))
     rows.append(labels)
 
 if args.save_dir:
     csv_save_path = os.path.join(args.save_dir, "results.csv")
 else:
-    print(os.path.dirname(os.path.abspath(__file__)))
     csv_save_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "results.csv")
 
 with open(csv_save_path, 'w', newline='', encoding='utf-8') as f:
